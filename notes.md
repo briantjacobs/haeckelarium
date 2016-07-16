@@ -1,0 +1,1 @@
+convert mask1.png -channel rgba -separate +channel -swap 2,3 -combine -colorspace sRGB mask1_swap.png
