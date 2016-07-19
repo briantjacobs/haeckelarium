@@ -1,0 +1,30 @@
+{
+  "name": "hackel2016",
+  "version": "1.0.0",
+  "description": "",
+  "main": "script.js",
+  "dependencies": {
+    "psd": "^3.1.0"
+  },
+  "devDependencies": {
+    "bluebird": "^3.4.1",
+    "gm": "^1.22.0",
+    "jsonfile": "^2.3.1",
+    "lodash": "^4.13.1",
+    "node-sprite-generator": "^0.10.2",
+    "psd": "^3.1.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/briantjacobs/haeckelarium.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/briantjacobs/haeckelarium/issues"
+  },
+  "homepage": "https://github.com/briantjacobs/haeckelarium#readme"
+}
