@@ -59,7 +59,7 @@
                         class: "test-canvas"
                     }))
 
-                .append(
+            .append(
                     $(this.hitCanvas).attr({
                         id: "hit-canvas",
                         class: "test-canvas"
@@ -189,11 +189,11 @@
             this.mainContext.drawImage(this.base.img, 0, 0, this.cWidth, this.cHeight);
         },
         drawSprite: function() {
-        	console.log(this.sprite)
-        	this.sWidth = this.sprite.img.naturalWidth
-        	this.sHeight = this.sprite.img.naturalHeight
-        	this.spriteCanvas.width = this.sWidth;
-        	this.spriteCanvas.height = this.sHeight;
+            console.log(this.sprite)
+            this.sWidth = this.sprite.img.naturalWidth
+            this.sHeight = this.sprite.img.naturalHeight
+            this.spriteCanvas.width = this.sWidth;
+            this.spriteCanvas.height = this.sHeight;
             this.spriteContext.drawImage(this.sprite.img, 0, 0, this.sWidth, this.sHeight);
         },
         drawHitMask: function() {
@@ -214,25 +214,28 @@
             );
 
 
-            // write to active mask canvas
+            // clear dest mask canvas of previous result
+            this.maskDestContext.clearRect(0, 0, this.cWidth, this.cHeight)
+
+            // only write the new sprite
             this.maskDestContext.putImageData(
-            	maskCanvasDataObj,  
-            	activeSpriteData.plate.left,  
-            	activeSpriteData.plate.top
+                maskCanvasDataObj,
+                activeSpriteData.plate.left,
+                activeSpriteData.plate.top
             );
 
-	            // animate crossfade
-	            TweenLite.fromTo(this.tweenVal, .5, {
-	                destMaskAlpha: 0,
-	                prevMaskAlpha: 1,
-	            }, {
-	                mainMaskAlpha: 1,
-	                destMaskAlpha: 1,
-	                prevMaskAlpha: 0,
-	                onUpdate: this.showMask,
-	                onUpdateScope: this,
-	                ease: Power1.easeInOut
-	            });            
+            // animate crossfade
+            TweenLite.fromTo(this.tweenVal, .5, {
+                destMaskAlpha: 0,
+                prevMaskAlpha: 1,
+            }, {
+                mainMaskAlpha: 1,
+                destMaskAlpha: 1,
+                prevMaskAlpha: 0,
+                onUpdate: this.showMask,
+                onUpdateScope: this,
+                ease: Power1.easeInOut
+            });
 
         },
         findMask: function(idx, spriteObj, fetchGroup) {
