@@ -36,8 +36,8 @@ PSD.open(img)
         data.visibleLayers = data.visibleLayers.map(function(d,i){
         	return _.pick(d, [ "left", "top", "width", "height", "imIndex","plateIndex", "name"])
         })
-
-        return jsonfile.writeFileAsync(imgLayerMeta, data.visibleLayers)
+        return new Promise.resolve()//(function(resolve,reject){resolve()})
+        // return jsonfile.writeFileAsync(imgLayerMeta, data.visibleLayers)
     })
     .then(function() {
         // write extracted layers
@@ -94,5 +94,17 @@ PSD.open(img)
         })
     })
     .then(function() {
-    	return jsonfile.writeFileAsync(spriteMeta, data.spriteMeta)
+    	// TODO: join each by index to more easily access
+    	var combinedLayersSprite = data.spriteMeta.map(function(d,i){
+    		return {
+    			id: d.plateIndex,
+    			plate: data.visibleLayers.find(function(dd,ii){
+    				// console.log(dd.plateIndex, d.plateIndex)
+    				return dd.plateIndex === d.plateIndex
+    			}),
+    			sprite: d
+    		}
+    	})
+
+    	return jsonfile.writeFileAsync(spriteMeta, combinedLayersSprite);
     })

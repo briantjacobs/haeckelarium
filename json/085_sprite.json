@@ -1,1 +1,39 @@
-[{"path":"img/output/085_layer-3.png","plateIndex":1,"width":592,"height":265,"x":0,"y":0},{"path":"img/output/085_layer-4.png","plateIndex":0,"width":363,"height":409,"x":0,"y":265}]
+[{
+    "id": 1,
+    "plate": {
+        "left": 325,
+        "top": 129,
+        "width": 592,
+        "height": 265,
+        "imIndex": 3,
+        "plateIndex": 1,
+        "name": "Color Fill 2"
+    },
+    "sprite": {
+        "path": "img/output/085_layer-3.png",
+        "plateIndex": 1,
+        "width": 592,
+        "height": 265,
+        "x": 0,
+        "y": 0
+    }
+}, {
+    "id": 0,
+    "plate": {
+        "left": 39,
+        "top": 124,
+        "width": 363,
+        "height": 409,
+        "imIndex": 4,
+        "plateIndex": 0,
+        "name": "Color Fill 1"
+    },
+    "sprite": {
+        "path": "img/output/085_layer-4.png",
+        "plateIndex": 0,
+        "width": 363,
+        "height": 409,
+        "x": 0,
+        "y": 265
+    }
+}]

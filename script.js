@@ -12,8 +12,8 @@
             this.mainCanvas = $("#mainCanvas")[0]
             this.mainContext = this.mainCanvas.getContext('2d');
             // this.mainContext.globalCompositeOperation="source-in";
-            this.cHeight = imageHeight = this.mainCanvas.height;
-            this.cWidth = imageWidth = this.mainCanvas.width;
+            this.cHeight = this.mainCanvas.height;
+            this.cWidth = this.mainCanvas.width;
             // this.cImage = this.mainContext.createImageData(this.cWidth, this.cHeight);
             // this.cImage = this.mainContext.getImageData(0, 0, this.cWidth, this.cHeight);
 
@@ -30,6 +30,10 @@
             this.hitCanvas.width = this.cWidth;
             // this.hitCanvas.setAttribute("moz-opaque");
             this.hitContext = this.hitCanvas.getContext('2d');
+
+            this.spriteCanvas = document.createElement('canvas'); //document.createElement('canvas');
+            this.spriteContext = this.spriteCanvas.getContext('2d');
+
 
             this.maskDestCanvas = document.createElement('canvas'); //document.createElement('canvas');
             this.maskDestCanvas.height = this.cHeight;
@@ -49,6 +53,12 @@
 
             // DEBUG BUFFER CANVAS
             $("body")
+                .append(
+                    $(this.spriteCanvas).attr({
+                        id: "sprite-canvas",
+                        class: "test-canvas"
+                    }))
+
                 .append(
                     $(this.hitCanvas).attr({
                         id: "hit-canvas",
@@ -71,18 +81,26 @@
                     }))
 
             // draw input mask to test canvas
-            this.mask = this.createImg('img/085_swap.png')
+            // this.mask = this.createImg('img/output/085_sprite.png')
+            this.sprite = this.createImg('img/output/085_sprite.png')
             this.base = this.createImg('img/085.jpg')
 
             var requests = [
-                this.mask.request,
-                this.base.request
+                this.sprite.request,
+                this.base.request,
+                $.ajax("json/085_sprite.json", {
+                    dataType: "json"
+                }).done(function(data) {
+                    _this.plateData = data;
+                })
+
             ]
 
             $.when.apply(null, requests).done(function() {
                 _this.initEventListeners()
                 _this.drawBase();
-                _this.drawHitMask();
+                _this.drawSprite();
+                // _this.drawHitMask();
             })
 
 
@@ -90,41 +108,53 @@
         initEventListeners: function() {
             var _this = this;
             //todo: debounce this when exiting a found zone
-            $(this.mainCanvas).on("mousemove", function(e) {
-                var pos = _this.findPos(this);
-                var x = e.pageX - pos.x;
-                var y = e.pageY - pos.y;
-                var coord = "x=" + x + ", y=" + y;
-                var p = _this.hitContext.getImageData(x, y, 1, 1).data;
-console.log(p)
-                // find the group
-                _this.toggleSubplate(p[0])
-            })
+            // $(this.mainCanvas).on("mousemove", function(e) {
+            //     var pos = _this.findPos(this);
+            //     var x = e.pageX - pos.x;
+            //     var y = e.pageY - pos.y;
+            //     var coord = "x=" + x + ", y=" + y;
+            //     var p = _this.hitContext.getImageData(x, y, 1, 1).data;
+            //     // find the group
+            //     _this.toggleSubplate(p[0])
+            // })
 
             $(".toggle")
-            	.on('mouseover', function(){
-            		_this.toggleSubplate(parseInt($(this).attr("data-id")))
-            	})
-            	.on('mouseout', function(){
-            		_this.toggleSubplate(255)
-            	})
+                .on('mouseover', function() {
+                    _this.toggleSubplate(parseInt($(this).attr("data-id")))
+                })
+                .on('mouseout', function() {
+                    _this.clearMask()
+                })
         },
+        // toggleSubplate: function(idx) {
+        //         // check if previous event color matches current color
+        //         if (this.currColorIdx !== idx) {
+        //             // within vs outside mask range
+        //             if (idx < 255) {
+        //                 // fetch by index
+        //                 this.findMask(idx)
+        //                     // fetch by group
+        //                     // _this.findMask(p[1], true)
+
+        //             } else {
+        //                 this.clearMask()
+        //             }
+        //             this.currColorIdx = idx;
+        //         }
+
+        // },
         toggleSubplate: function(idx) {
-                // check if previous event color matches current color
-                if (this.currColorIdx !== idx) {
-                    // within vs outside mask range
-                    if (idx < 255) {
-                        // fetch by index
-                        this.findMask(idx)
-                            // fetch by group
-                            // _this.findMask(p[1], true)
-
-                    } else {
-                        this.clearMask()
-                    }
-                    this.currColorIdx = idx;
+            var activeSpriteData = this.plateData.filter(function(d) {
+                if (d.id === idx) {
+                    return d;
                 }
+            })
+            console.log(activeSpriteData)
+            this.findSprite(activeSpriteData[0])
+                // extract image(s) from mask canvas
 
+
+            // copy image(s) to target canvas
         },
 
 
@@ -136,7 +166,10 @@ console.log(p)
                     curleft += obj.offsetLeft;
                     curtop += obj.offsetTop;
                 } while (obj = obj.offsetParent);
-                return { x: curleft, y: curtop };
+                return {
+                    x: curleft,
+                    y: curtop
+                };
             }
             return undefined;
         },
@@ -155,13 +188,55 @@ console.log(p)
         drawBase: function() {
             this.mainContext.drawImage(this.base.img, 0, 0, this.cWidth, this.cHeight);
         },
-
+        drawSprite: function() {
+        	console.log(this.sprite)
+        	this.sWidth = this.sprite.img.naturalWidth
+        	this.sHeight = this.sprite.img.naturalHeight
+        	this.spriteCanvas.width = this.sWidth;
+        	this.spriteCanvas.height = this.sHeight;
+            this.spriteContext.drawImage(this.sprite.img, 0, 0, this.sWidth, this.sHeight);
+        },
         drawHitMask: function() {
             this.hitContext.drawImage(this.mask.img, 0, 0, this.cWidth, this.cHeight);
         },
-        findMask: function(idx, fetchGroup) {
+
+        findSprite: function(activeSpriteData) {
             var _this = this;
-console.log(idx)
+            //cache current canvas to a previous canvas buffer
+            this.maskPrevContext.clearRect(0, 0, this.cWidth, this.cHeight)
+            this.maskPrevContext.drawImage(this.maskDestCanvas, 0, 0, this.cWidth, this.cHeight);
+
+            var maskCanvasDataObj = this.spriteContext.getImageData(
+                activeSpriteData.sprite.x,
+                activeSpriteData.sprite.y,
+                activeSpriteData.sprite.width,
+                activeSpriteData.sprite.height
+            );
+
+
+            // write to active mask canvas
+            this.maskDestContext.putImageData(
+            	maskCanvasDataObj,  
+            	activeSpriteData.plate.left,  
+            	activeSpriteData.plate.top
+            );
+
+	            // animate crossfade
+	            TweenLite.fromTo(this.tweenVal, .5, {
+	                destMaskAlpha: 0,
+	                prevMaskAlpha: 1,
+	            }, {
+	                mainMaskAlpha: 1,
+	                destMaskAlpha: 1,
+	                prevMaskAlpha: 0,
+	                onUpdate: this.showMask,
+	                onUpdateScope: this,
+	                ease: Power1.easeInOut
+	            });            
+
+        },
+        findMask: function(idx, spriteObj, fetchGroup) {
+            var _this = this;
             //cache current canvas to a previous canvas buffer
             this.maskPrevContext.clearRect(0, 0, this.cWidth, this.cHeight)
             this.maskPrevContext.drawImage(this.maskDestCanvas, 0, 0, this.cWidth, this.cHeight);
@@ -175,7 +250,6 @@ console.log(idx)
             var i, r, g, b, a, channelIdx;
             var opacity = 0;
 
-console.log("HIT", hitImageData[1])
             for (var y = 0; y < this.cHeight; y++) {
                 for (var x = 0; x < this.cWidth; x++) {
                     i = (x + y * this.cWidth) * 4;
@@ -209,7 +283,7 @@ console.log("HIT", hitImageData[1])
                     }
                 }
             }
-            
+
             // write to active mask canvas
             this.maskDestContext.putImageData(maskCanvasDataObj, 0, 0);
 
@@ -236,8 +310,6 @@ console.log("HIT", hitImageData[1])
             });
         },
         showMask: function() {
-
-            //TODO: copy previous mask state and save it before animating in order to crossfade
 
             // draw mask base to buffer
             this.mixMaskContext.clearRect(0, 0, this.cWidth, this.cHeight)
