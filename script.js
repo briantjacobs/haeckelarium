@@ -17,7 +17,7 @@
             // this.cImage = this.mainContext.createImageData(this.cWidth, this.cHeight);
             // this.cImage = this.mainContext.getImageData(0, 0, this.cWidth, this.cHeight);
 
-            this.OVERLAY_ALPHA = .9;
+            this.OVERLAY_ALPHA = .8;
             this.OVERLAY_COLOR = "rgb(0,0,0)"
             this.tweenVal = {
                 destMaskAlpha: 0,
@@ -34,6 +34,8 @@
             this.spriteCanvas = document.createElement('canvas'); //document.createElement('canvas');
             this.spriteContext = this.spriteCanvas.getContext('2d');
 
+            this.spriteBufferCanvas = document.createElement('canvas'); //document.createElement('canvas');
+            this.spriteBufferContext = this.spriteBufferCanvas.getContext('2d');
 
             this.maskDestCanvas = document.createElement('canvas'); //document.createElement('canvas');
             this.maskDestCanvas.height = this.cHeight;
@@ -52,14 +54,21 @@
 
 
             // DEBUG BUFFER CANVAS
-            $("body")
-                .append(
-                    $(this.spriteCanvas).attr({
-                        id: "sprite-canvas",
-                        class: "test-canvas"
-                    }))
+            $(".debug-buffers")
+
 
             .append(
+                $(this.spriteCanvas).attr({
+                    id: "sprite-canvas",
+                    class: "test-canvas"
+                }))
+
+            .append(
+                    $(this.spriteBufferCanvas).attr({
+                        id: "sprite-buffer-canvas",
+                        class: "test-canvas"
+                    }))
+                .append(
                     $(this.hitCanvas).attr({
                         id: "hit-canvas",
                         class: "test-canvas"
@@ -100,7 +109,7 @@
                 _this.initEventListeners()
                 _this.drawBase();
                 _this.drawSprite();
-                // _this.drawHitMask();
+                _this.drawHitMask();
             })
 
 
@@ -145,16 +154,16 @@
         // },
         toggleSubplate: function(idx) {
             var activeSpriteData = this.plateData.filter(function(d) {
-                if (d.id === idx) {
-                    return d;
-                }
-            })
-            console.log(activeSpriteData)
-            this.findSprite(activeSpriteData[0])
-                // extract image(s) from mask canvas
+                    if (d.id === idx) {
+                        return d;
+                    }
+                })
+                // find all items
+            // this.findSprite(this.plateData)
 
+            //find single sprite
+            this.findSprite(activeSpriteData)
 
-            // copy image(s) to target canvas
         },
 
 
@@ -189,7 +198,6 @@
             this.mainContext.drawImage(this.base.img, 0, 0, this.cWidth, this.cHeight);
         },
         drawSprite: function() {
-            console.log(this.sprite)
             this.sWidth = this.sprite.img.naturalWidth
             this.sHeight = this.sprite.img.naturalHeight
             this.spriteCanvas.width = this.sWidth;
@@ -197,32 +205,51 @@
             this.spriteContext.drawImage(this.sprite.img, 0, 0, this.sWidth, this.sHeight);
         },
         drawHitMask: function() {
-            this.hitContext.drawImage(this.mask.img, 0, 0, this.cWidth, this.cHeight);
+            this.drawSpritesToPlate(this.hitContext, this.plateData)
         },
 
+        drawSpritesToPlate: function(targetContext, spriteData) {
+        	var _this = this;
+            spriteData.forEach(function(d) {
+                // loop through data and draw images
+                var maskCanvasDataObj = _this.spriteContext.getImageData(
+                    d.sprite.x,
+                    d.sprite.y,
+                    d.sprite.width,
+                    d.sprite.height
+                );
+
+                // turn image from sprite into its own canvas 
+                // rather than use putimagedata--so opaque pixels arent desctuctive
+                // TODO: should this canvas get destroyed after its used?
+                _this.spriteBufferCanvas.width = d.sprite.width;
+                _this.spriteBufferCanvas.height = d.sprite.height;
+                _this.spriteBufferContext.clearRect(0, 0, d.sprite.width, d.sprite.height)
+                _this.spriteBufferContext.putImageData(
+                    maskCanvasDataObj, 0, 0
+                );
+
+                //write the canvas'd single sprite img to the plate mask canvas
+                targetContext.drawImage(
+                    _this.spriteBufferCanvas,
+                    d.plate.left,
+                    d.plate.top,
+                    d.sprite.width,
+                    d.sprite.height
+                );
+
+            })
+        },
         findSprite: function(activeSpriteData) {
             var _this = this;
             //cache current canvas to a previous canvas buffer
             this.maskPrevContext.clearRect(0, 0, this.cWidth, this.cHeight)
             this.maskPrevContext.drawImage(this.maskDestCanvas, 0, 0, this.cWidth, this.cHeight);
 
-            var maskCanvasDataObj = this.spriteContext.getImageData(
-                activeSpriteData.sprite.x,
-                activeSpriteData.sprite.y,
-                activeSpriteData.sprite.width,
-                activeSpriteData.sprite.height
-            );
-
-
             // clear dest mask canvas of previous result
             this.maskDestContext.clearRect(0, 0, this.cWidth, this.cHeight)
-
-            // only write the new sprite
-            this.maskDestContext.putImageData(
-                maskCanvasDataObj,
-                activeSpriteData.plate.left,
-                activeSpriteData.plate.top
-            );
+            // draw sprites to dynamic mask context
+            this.drawSpritesToPlate(_this.maskDestContext, activeSpriteData)
 
             // animate crossfade
             TweenLite.fromTo(this.tweenVal, .5, {

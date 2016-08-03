@@ -1,32 +1,68 @@
 <html>
+
 <head>
-<style>
-.test-canvas {width: 250px;}
-</style>
-
-<script type="text/javascript" src="bower_components/gsap/src/uncompressed/TweenLite.js"></script>
-
-<script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
-
-<!-- <script type="text/javascript" src="bower_components/zeptojs/src/zepto.js"></script>
+    <style>
+    body {
+        margin: 0;
+    }
+    
+    #mainCanvas {
+        margin: 15px;
+        box-shadow: 0 0 25px rgba(0, 0, 0, .5)
+    }
+    
+    .image {
+        float: left;
+    }
+    
+    .test-canvas {
+        border: 1px solid #ff0000;
+        margin: 10px;
+        clear: both;
+        width: 250px;
+    }
+    
+    .toggle-wrap {}
+    
+    .toggle {
+        background: #888;
+        border: none;
+        color: #fff;
+        padding: 5px 10px;
+        font-size: 40px;
+        font-family: sans-serif;
+        margin: 10px;
+    }
+    
+    .toggle:hover {
+        background: #333
+    }
+    
+    body {
+        background: lightyellow
+    }
+    </style>
+    <script type="text/javascript" src="bower_components/gsap/src/uncompressed/TweenLite.js"></script>
+    <script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
+    <!-- <script type="text/javascript" src="bower_components/zeptojs/src/zepto.js"></script>
 <script type="text/javascript" src="bower_components/zeptojs/src/event.js"></script>
 <script type="text/javascript" src="bower_components/zeptojs/src/ajax.js"></script>
 <script type="text/javascript" src="bower_components/zeptojs/src/callbacks.js"></script>
 <script type="text/javascript" src="bower_components/zeptojs/src/deferred.js"></script> -->
-<script type="text/javascript" src="script.js"></script>
+    <script type="text/javascript" src="script.js"></script>
+</head>
+
 <body>
+    <div class="toggle-wrap">
+        <button class="toggle" data-id="0">Specimen 0</button>
+        <button class="toggle" data-id="1">Specimen 1</button>
+    </div>
 
-
-<div class="image">
-
-<canvas id="mainCanvas" width="1291" height="1955"></canvas>
-<!-- <canvas id="hitCanvas" width="864" height="864"></canvas>
-<canvas id="maskDestCanvas" width="864" height="864" style="background-color: #ff0000"></canvas> -->
-
-</div>
-
-<div class="toggle" data-id="0">Specimen 0</div>
-<div class="toggle" data-id="1">Specimen 1</div>
+    <div class="image">
+        <canvas id="mainCanvas" width="1291" height="1955"></canvas>
+    </div>
+    <div class="debug-buffers"></div>
 
 </body>
+
 </html>
